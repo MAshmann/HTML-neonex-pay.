@@ -1,92 +1,185 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Neonex Pay | Official Web3 Infrastructure</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
-    <style>
-        :root { --neon-gold: #FFD700; --bg-dark: #000000; }
-        body { background-color: var(--bg-dark); color: white; font-family: 'Inter', sans-serif; }
-        .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); }
-        .neon-glow { box-shadow: 0 0 20px rgba(255, 215, 0, 0.3); }
-    </style>
-</head>
-<body>
+import Header from "@/components/Header";
+import Sidebar from "@/components/Sidebar";
+import BalanceCard from "@/components/BalanceCard";
+import PixNeoCard from "@/components/PixNeoCard";
+import WalletCard from "@/components/WalletCard";
+import TransactionsList from "@/components/TransactionsList";
+import NetworkStatus from "@/components/NetworkStatus";
 
-    <nav class="fixed w-full z-50 glass px-6 py-4 flex justify-between items-center">
-        <div class="text-2xl font-black italic text-yellow-400 tracking-tighter">NEONEX</div>
-        <button onclick="connectWallet()" id="walletBtn" class="text-[10px] font-bold border border-yellow-400/50 px-4 py-2 rounded-full hover:bg-yellow-400 hover:text-black transition-all">CONECTAR CARTEIRA</button>
-    </nav>
+export default function Dashboard() {
+  return (
+    <div className="flex h-screen bg-black text-yellow-400">
+      <Sidebar />
 
-    <section class="pt-32 pb-16 px-6 text-center">
-        <h1 class="text-5xl font-black mb-6 leading-[1.1]">Pagamentos Web3 <br><span class="text-yellow-400">Sem Fronteiras.</span></h1>
-        <p class="text-zinc-500 max-w-sm mx-auto text-sm mb-10">A infraestrutura completa para o Brasil: Pix + Blockchain com taxas próximas de zero.</p>
-        <div class="flex justify-center gap-4">
-            <a href="#pagar" class="bg-yellow-400 text-black px-8 py-4 rounded-2xl font-black uppercase text-sm neon-glow">Usar Agora</a>
-        </div>
-    </section>
+      <div className="flex-1 flex flex-col">
+        <Header user="Marcelo" />
 
-    <section id="pagar" class="py-12 px-6">
-        <div class="max-w-md mx-auto glass p-8 rounded-[2.5rem] border-2 border-yellow-400/10">
-            <h2 class="text-center font-bold text-zinc-400 uppercase text-xs tracking-widest mb-6">Terminal de Transação</h2>
-            <div class="bg-black/50 p-6 rounded-3xl mb-4 border border-zinc-800">
-                <input id="amountInput" type="number" placeholder="0.00" class="w-full bg-transparent text-4xl text-center font-bold text-yellow-400 outline-none">
-                <span class="block text-center text-zinc-600 text-[10px] mt-2 font-bold uppercase tracking-widest">Valor em POL (Polygon)</span>
-            </div>
-            <button onclick="executePayment()" class="w-full bg-white text-black py-5 rounded-2xl font-black text-lg hover:bg-yellow-400 transition-all uppercase tracking-tighter">Confirmar Pagamento</button>
-            <p id="statusTxt" class="text-center mt-4 text-[10px] text-zinc-500 font-mono italic">Aguardando interação...</p>
-        </div>
-    </section>
+        <main className="p-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+          <BalanceCard />
+          <PixNeoCard />
+          <WalletCard />
 
-    <section class="py-12 px-6 grid grid-cols-2 gap-4 max-w-md mx-auto">
-        <div class="glass p-4 rounded-2xl text-center">
-            <div class="text-yellow-400 font-bold text-lg">AES-256</div>
-            <div class="text-zinc-600 text-[9px] uppercase">Criptografia</div>
-        </div>
-        <div class="glass p-4 rounded-2xl text-center">
-            <div class="text-yellow-400 font-bold text-lg">P2P</div>
-            <div class="text-zinc-600 text-[9px] uppercase">Não-Custodial</div>
-        </div>
-    </section>
+          <div className="md:col-span-2">
+            <TransactionsList />
+          </div>
 
-    <section class="py-10 px-8 text-zinc-700 text-[10px] leading-relaxed max-w-2xl mx-auto border-t border-zinc-900">
-        <h4 class="font-bold text-zinc-500 mb-2 uppercase">Termos e Privacidade</h4>
-        <p>Ao conectar sua carteira, você concorda com o processamento descentralizado na rede Polygon. A Neonex Pay não armazena chaves privadas. Todas as transações são finais e regidas pelos Smart Contracts da plataforma. Compatível com LGPD e normas internacionais de ativos digitais.</p>
-    </section>
+          <NetworkStatus />
+        </main>
+      </div>
+    </div>
+  );
+}
 
-    <footer class="py-12 text-center text-zinc-600 text-[9px] uppercase tracking-[0.3em]">
-        Neonex Pay &copy; 2026 | Built for the New Economy
-    </footer>
+import { ShieldCheck } from "lucide-react";
 
-    <script>
-        async function connectWallet() {
-            if (window.ethereum) {
-                const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-                document.getElementById('walletBtn').innerText = accounts[0].substring(0,6) + "..." + accounts[0].substring(38);
-                document.getElementById('walletBtn').classList.add('bg-green-500/10', 'text-green-500');
-            }
-        }
+export default function Header({ user }: { user: string }) {
+  return (
+    <header className="flex items-center justify-between px-6 py-4 border-b border-yellow-500/20">
+      <h1 className="text-xl font-bold tracking-widest">NEONEX-PAY</h1>
 
-        async function executePayment() {
-            if (!window.ethereum) return alert("Use o navegador da MetaMask!");
-            const provider = new ethers.providers.Web3Provider(window.ethereum);
-            const signer = provider.getSigner();
-            const val = document.getElementById('amountInput').value || "0.01";
+      <div className="flex items-center gap-3">
+        <ShieldCheck className="text-yellow-400" />
+        <span className="text-sm">Olá, {user}</span>
+      </div>
+    </header>
+  );
+}
+import { LayoutDashboard, Wallet, Repeat, Settings } from "lucide-react";
+
+const menu = [
+  { name: "Dashboard", icon: LayoutDashboard },
+  { name: "Wallet", icon: Wallet },
+  { name: "PixNEO", icon: Repeat },
+  { name: "Transações", icon: Repeat },
+  { name: "Configurações", icon: Settings },
+];
+
+export default function Sidebar() {
+  return (
+    <aside className="w-20 md:w-56 bg-black border-r border-yellow-500/20 flex flex-col items-center md:items-start p-4 gap-6">
+      {menu.map((item) => (
+        <button
+          key={item.name}
+          className="flex items-center gap-3 hover:text-yellow-300 transition"
+        >
+          <item.icon />
+          <span className="hidden md:block">{item.name}</span>
+        </button>
+      ))}
+    </aside>
+  );
+}
+import { useEffect, useState } from "react";
+
+export default function BalanceCard() {
+  const [balance, setBalance] = useState(12.345);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setBalance((prev) => prev + Math.random() * 0.001);
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-xl p-5">
+      <p className="text-sm text-yellow-300">Saldo Total</p>
+      <h2 className="text-3xl font-bold">{balance.toFixed(4)} NEX</h2>
+      <p className="text-xs text-yellow-300 mt-1">≈ R$ 98.432,00 (estimado)</p>
+    </div>
+  );
+}
+export default function PixNeoCard() {
+  return (
+    <div className="bg-yellow-400 text-black rounded-xl p-5 flex flex-col gap-4 justify-between">
+      <h2 className="text-lg font-bold">PixNEO</h2>
+
+      <div className="flex gap-3">
+        <button className="flex-1 bg-black text-yellow-400 py-2 rounded-lg hover:opacity-80">
+          Enviar
+        </button>
+        <button className="flex-1 bg-black text-yellow-400 py-2 rounded-lg hover:opacity-80">
+          Receber
+        </button>
+      </div>
+    </div>
+  );
+}
+const networks = [
+  { name: "Stellar", balance: 1200 },
+  { name: "Solana", balance: 8.23 },
+  { name: "Polygon", balance: 450 },
+];
+
+export default function WalletCard() {
+  return (
+    <div className="bg-black border border-yellow-500/30 rounded-xl p-5">
+      <h3 className="mb-3 font-semibold">Wallets</h3>
+
+      <ul className="space-y-2">
+        {networks.map((net) => (
+          <li key={net.name} className="flex justify-between text-sm">
+            <span>{net.name}</span>
+            <span>{net.balance}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+const txs = [
+  { id: 1, value: "+250 NEX", network: "Solana", status: "Concluída" },
+  { id: 2, value: "-80 NEX", network: "Polygon", status: "Pendente" },
+];
+
+export default function TransactionsList() {
+  return (
+    <div className="bg-black border border-yellow-500/30 rounded-xl p-5">
+      <h3 className="mb-4 font-semibold">Últimas Transações</h3>
+
+      <ul className="space-y-3 text-sm">
+        {txs.map((tx) => (
+          <li key={tx.id} className="flex justify-between">
+            <span>{tx.value}</span>
+            <span>{tx.network}</span>
+            <span
+              className={
+                tx.status === "Concluída"
+                  ? "text-green-400"
+                  : "text-yellow-400"
+              }
+            >
+              {tx.status}
+            </span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+const networks = [
+  { name: "Stellar", latency: "32ms" },
+  { name: "Solana", latency: "110ms" },
+  { name: "Polygon", latency: "78ms" },
+];
+
+export default function NetworkStatus() {
+  return (
+    <div className="bg-black border border-yellow-500/30 rounded-xl p-5">
+      <h3 className="mb-3 font-semibold">Status das Redes</h3>
+
+      <ul className="space-y-2 text-sm">
+        {networks.map((net) => (
+          <li key={net.name} className="flex justify-between">
+            <span>{net.name}</span>
+            <span>{net.latency}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
             
-            try {
-                document.getElementById('statusTxt').innerText = "Processando Segurança...";
-                const tx = await signer.sendTransaction({
-                    to: "SEU_ENDEREÇO_AQUI", // Coloque sua carteira aqui
-                    value: ethers.utils.parseEther(val)
-                });
-                document.getElementById('statusTxt').innerText = "Sucesso! Hash: " + tx.hash.substring(0,12);
-            } catch (err) {
-                document.getElementById('statusTxt').innerText = "Erro: " + err.message.substring(0,25);
-            }
-        }
-    </script>
-</body>
-</html>
-# HTML-neonex-pay.
+           
